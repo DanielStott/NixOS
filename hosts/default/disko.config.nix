@@ -3,7 +3,8 @@
     disk = {
       vdb = {
         type = "disk";
-        device = "/dev/nvme1n1"; # Adjust this to match your disk
+#        device = "/dev/nvme1n1"; # Adjust this to match your disk
+        device = "/dev/sda"; # Adjust this to match your disk
         content = {
           type = "gpt";
           partitions = {
