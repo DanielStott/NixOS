@@ -14,6 +14,7 @@
     ./hardware.nix
     ./users.nix
     ./packages-fonts.nix
+    ../../disko/config.nix
     ../../modules/amd-drivers.nix
     ../../modules/nvidia-drivers.nix
     ../../modules/nvidia-prime-drivers.nix
