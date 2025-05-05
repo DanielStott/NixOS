@@ -10,7 +10,7 @@
           partitions = {
             boot = {
               name = "boot";
-              size = "512M";
+              size = "2048M";
               type = "EF00"; # EFI System Partition
               content = {
                 type = "filesystem";
