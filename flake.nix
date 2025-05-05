@@ -4,6 +4,9 @@
   inputs = {
 	nixpkgs.url = "github:nixos/nixpkgs/nixos-24.11";
   	#nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+    disko.url = "github:nix-community/disko";
+    disko.inputs.nixpkgs.follows = "nixpkgs";
+
 	
 	#hyprland.url = "github:hyprwm/Hyprland"; # hyprland development
 	#distro-grub-themes.url = "github:AdisonCavani/distro-grub-themes";
@@ -14,8 +17,8 @@
 	inputs@{ self, nixpkgs, ... }:
     	let
       system = "x86_64-linux";
-      host = "NixOS-Hyprland";
-      username = "alice";
+      host = "NixOS-Stott";
+      username = "stott";
 
     pkgs = import nixpkgs {
        	inherit system;
@@ -35,6 +38,7 @@
 			};
 	   		modules = [ 
 				./hosts/${host}/config.nix 
+			    disko.nixosModules.disko	
 				# inputs.distro-grub-themes.nixosModules.${system}.default
 				];
 			};
