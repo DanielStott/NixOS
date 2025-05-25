@@ -78,7 +78,7 @@ echo "$NOTE Using disk /dev/${installDisk} with encryption enabled"
 if hostnamectl | grep -q 'Chassis: vm'; then
   echo "${NOTE} Your system is running on a VM. Enabling guest services.."
   echo "${WARN} A Kind reminder to enable 3D acceleration.."
-  sed -i '/vm\.guest-services\.enable = false;/s/vm\.guest-services\.enable = false;/ vm.guest-services.enable = true;/' hosts/default/config.nix
+  sed -i '/vm\.guest-services\.enable = false;/s/vm\.guest-services\.enable = false;/ vm.guest-services.enable = true;/' hosts/stott/config.nix
 fi
 
 # Checking if system has nvidia gpu and enable in default config.nix
@@ -86,7 +86,7 @@ if command -v lspci > /dev/null 2>&1; then
   # lspci is available, proceed with checking for Nvidia GPU
   if lspci -k | grep -A 2 -E "(VGA|3D)" | grep -iq nvidia; then
     echo "${NOTE} Nvidia GPU detected. Setting up for nvidia..."
-    sed -i '/drivers\.nvidia\.enable = false;/s/drivers\.nvidia\.enable = false;/ drivers.nvidia.enable = true;/' hosts/default/config.nix
+    sed -i '/drivers\.nvidia\.enable = false;/s/drivers\.nvidia\.enable = false;/ drivers.nvidia.enable = true;/' hosts/stott/config.nix
   fi
 fi
 
@@ -100,7 +100,7 @@ answer=${answer:-Y}
 
 if [[ "$answer" =~ ^[Nn]$ ]]; then
     sed -i 's|^\([[:space:]]*\)ags.url = "github:aylur/ags/v1";|\1#ags.url = "github:aylur/ags/v1";|' flake.nix
-    sed -i 's|^\([[:space:]]*\)ags|\1#ags|' hosts/default/packages-fonts.nix
+    sed -i 's|^\([[:space:]]*\)ags|\1#ags|' hosts/stott/packages-fonts.nix
 fi
 
 echo "-----"
@@ -120,9 +120,9 @@ fi
 echo "-----"
 
 # Create directory for the new hostname, unless the default is selected
-if [ "$hostName" != "default" ]; then
+if [ "$hostName" != "stott" ]; then
   mkdir -p hosts/"$hostName"
-  cp hosts/default/*.nix hosts/"$hostName"
+  cp hosts/stott/*.nix hosts/"$hostName"
   git add .
 else
   echo "Default hostname selected, no extra hosts directory created."
