@@ -129,9 +129,9 @@ else
 fi
 echo "-----"
 
-read -rp "$CAT Enter your keyboard layout: [ us ] " keyboardLayout
+read -rp "$CAT Enter your keyboard layout: [ gb ] " keyboardLayout
 if [ -z "$keyboardLayout" ]; then
-  keyboardLayout="us"
+  keyboardLayout="gb"
 fi
 
 sed -i 's/keyboardLayout\s*=\s*"\([^"]*\)"/keyboardLayout = "'"$keyboardLayout"'"/' ./hosts/$hostName/variables.nix
@@ -187,7 +187,7 @@ printf "\n%.0s" {1..1}
 # Set the Nix configuration for experimental features
 NIX_CONFIG="experimental-features = nix-command flakes"
 #sudo nix flake update
-sudo nixos-rebuild switch --flake ~/NixOS-Hyprland/#"${hostName}" --arg installDisk \""${installDisk}"\"
+sudo nixos-rebuild switch --flake ~/NixOS-Hyprland#"${hostName}" --argstr installDisk "${installDisk}"
 
 echo "-----"
 printf "\n%.0s" {1..2}
