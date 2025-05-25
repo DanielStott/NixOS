@@ -1,9 +1,9 @@
-{
+{ disk ? "", ... }: {
   disko.devices = {
     disk = {
       vdb = {
         type = "disk";
-        device = "/dev/sda";
+        device = "/dev/${disk}";
         content = {
           type = "gpt";
           partitions = {
@@ -32,28 +32,17 @@
                   format = "btrfs";
                   mountpoint = "/";
                   subvolumes = {
-                    "/root" = {
-                      mountpoint = "/";
-                    };
-                    "/home" = {
-                      mountpoint = "/home";
-                    };
-                    "/nix" = {
-                      mountpoint = "/nix";
-                    };
-                    "/var" = {
-                      mountpoint = "/var";
-                    };
-                    "/@snapshots" = {
-                      mountpoint = "/.snapshots";
-                    };
+                    "/root" = { mountpoint = "/"; };
+                    "/home" = { mountpoint = "/home"; };
+                    "/nix" = { mountpoint = "/nix"; };
+                    "/var" = { mountpoint = "/var"; };
+                    "/@snapshots" = { mountpoint = "/.snapshots"; };
                   };
-                  # Btrfs mount options
                   options = [
                     "compress=zstd"
                     "noatime"
                     "space_cache=v2"
-                    "ssd" # If using an SSD
+                    "ssd"
                   ];
                 };
               };

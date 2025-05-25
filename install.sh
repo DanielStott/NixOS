@@ -47,6 +47,33 @@ else
   exit 1
 fi
 
+# Show available disks
+echo "$NOTE Available disks:"
+lsblk -d -e 7,11 -o NAME,SIZE,MODEL
+echo "-----"
+
+# Ask for disk selection with warning
+echo "$WARN WARNING: This will erase all data on the selected disk!"
+read -rp "$CAT Enter the disk to install to (e.g., sda, nvme0n1): " installDisk
+if [ -z "$installDisk" ]; then
+    echo "$ERROR No disk specified."
+    exit 1
+fi
+
+if ! lsblk "/dev/${installDisk}" >/dev/null 2>&1; then
+    echo "$ERROR Invalid disk specified: ${installDisk}"
+    exit 1
+fi
+
+# Ask for confirmation
+read -rp "$WARN Are you sure you want to erase /dev/${installDisk}? (y/N): " confirm
+if [[ ! "$confirm" =~ ^[Yy]$ ]]; then
+    echo "$NOTE Installation aborted."
+    exit 1
+fi
+
+echo "$NOTE Using disk /dev/${installDisk} with encryption enabled"
+
 # Checking if running on a VM and enable in default config.nix
 if hostnamectl | grep -q 'Chassis: vm'; then
   echo "${NOTE} Your system is running on a VM. Enabling guest services.."
@@ -160,7 +187,7 @@ printf "\n%.0s" {1..1}
 # Set the Nix configuration for experimental features
 NIX_CONFIG="experimental-features = nix-command flakes"
 #sudo nix flake update
-sudo nixos-rebuild switch --flake ~/NixOS-Hyprland/#"${hostName}"
+sudo nixos-rebuild switch --flake ~/NixOS-Hyprland/#"${hostName}" --arg installDisk \"${installDisk}\"
 
 echo "-----"
 printf "\n%.0s" {1..2}
