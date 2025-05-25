@@ -43,6 +43,11 @@
     initrd = { 
       availableKernelModules = [ "xhci_pci" "ahci" "nvme" "usb_storage" "usbhid" "sd_mod" ];
       kernelModules = [ ];
+      luks.devices."cryptroot" = {
+        device = "/dev/disk/by-partlabel/cryptroot";
+        preLVM = true;
+        allowDiscards = true;
+      };
     };
 
     # Needed For Some Steam Games
