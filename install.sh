@@ -187,7 +187,7 @@ printf "\n%.0s" {1..1}
 # Set the Nix configuration for experimental features
 NIX_CONFIG="experimental-features = nix-command flakes"
 #sudo nix flake update
-sudo nixos-rebuild switch --flake ~/NixOS-Hyprland#"${hostName}" --argstr installDisk "${installDisk}"
+sudo nixos-rebuild switch --flake ~/NixOS#"${hostName}" --argstr installDisk "${installDisk}"
 
 echo "-----"
 printf "\n%.0s" {1..2}
@@ -268,7 +268,7 @@ else
 fi
 
 #return to NixOS-Hyprland
-cd ~/NixOS-Hyprland
+cd ~/NixOS
 
 # copy fastfetch config if nixos.png is not present
 if [ ! -f "$HOME/.config/fastfetch/nixos.png" ]; then
