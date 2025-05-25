@@ -112,9 +112,9 @@ sleep 1
 
 echo "-----"
 
-read -rp "$CAT Enter Your New Hostname: [ default ] " hostName
+read -rp "$CAT Enter Your New Hostname: [ stott ] " hostName
 if [ -z "$hostName" ]; then
-  hostName="default"
+  hostName="stott"
 fi
 
 echo "-----"
@@ -187,7 +187,7 @@ printf "\n%.0s" {1..1}
 # Set the Nix configuration for experimental features
 NIX_CONFIG="experimental-features = nix-command flakes"
 #sudo nix flake update
-sudo nixos-rebuild switch --flake ~/NixOS-Hyprland/#"${hostName}" --arg installDisk \"${installDisk}\"
+sudo nixos-rebuild switch --flake ~/NixOS-Hyprland/#"${hostName}" --arg installDisk \""${installDisk}"\"
 
 echo "-----"
 printf "\n%.0s" {1..2}

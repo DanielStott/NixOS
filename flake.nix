@@ -17,7 +17,7 @@
       system = "x86_64-linux";
       host = "NixOS-Stott";
       username = "stott";
-      installDisk = "sda"; # Default disk, can be overridden
+      installDisk = builtins.getEnv "installDisk" or "sda";
 
       pkgs = import nixpkgs {
         inherit system;
