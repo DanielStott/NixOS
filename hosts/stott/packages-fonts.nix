@@ -42,10 +42,9 @@
     fastfetch
     (mpv.override {scripts = [mpvScripts.mpris];}) # with tray
     #ranger
-      
-    # Hyprland Stuff
-    #(ags.overrideAttrs (oldAttrs: { inherit (oldAttrs) pname; version = "1.8.2"; }))
-    ags # desktop overview  
+
+    # KooL Dots and Hyprland Stuff
+    hyprland-qt-support # for hyprland-qt-support
     btop
     brightnessctl # for brightness control
     cava
@@ -91,8 +90,9 @@
 	  python-packages
   ];
 
-  # FONTS
-  fonts.packages = with pkgs; [
+#FONTS
+fonts = {
+  packages = with pkgs; [
     noto-fonts
     fira-code
     noto-fonts-cjk-sans
@@ -100,13 +100,12 @@
     font-awesome
     terminus_font
     victor-mono
-    (nerdfonts.override {fonts = ["JetBrainsMono"];}) # stable banch
-    (nerdfonts.override {fonts = ["FantasqueSansMono"];}) # stable banch
-    
-    #nerd-fonts.jetbrains-mono # unstable 
-    #nerd-fonts.fira-code # unstable
-    #nerd-fonts.fantasque-sans-mono #unstable
- 	];
+    #(nerdfonts.override {fonts = ["JetBrainsMono"];}) # stable banch
+    nerd-fonts.jetbrains-mono # unstable
+    nerd-fonts.fira-code # unstable
+    nerd-fonts.fantasque-sans-mono #unstable
+    ];
+  };
   
   programs = {
 	  hyprland = {
