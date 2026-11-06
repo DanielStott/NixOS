@@ -38,6 +38,11 @@ let
       packages = mkOption { type = types.listOf types.package; default = [ ]; };
       gpu = mkOption { type = types.bool; default = true; description = "Give the env the GPU's render node."; };
       lan = mkOption { type = types.bool; default = false; description = "Allow the home LAN (otherwise internet only)."; };
+      audio = mkOption {
+        type = types.bool;
+        default = true;
+        description = "Sound and microphone through a restricted PipeWire-Pulse socket (can't control other apps' streams).";
+      };
       nixDaemon = mkOption { type = types.bool; default = false; description = "Let the env talk to the host's Nix daemon (for nix develop)."; };
       binds = mkOption {
         type = types.attrsOf types.str;
@@ -157,7 +162,7 @@ in
       # `:idmap` makes files owned by the host user appear as the env user's own.
       bindMounts = {
         "home" = { hostPath = "${stateDir name}/home"; mountPoint = "/home/${user}:idmap"; isReadOnly = false; };
-        "wayland" = { hostPath = runDir name; mountPoint = "/run/host-wayland:idmap"; isReadOnly = false; };
+        "session" = { hostPath = runDir name; mountPoint = "/run/host-session:idmap"; isReadOnly = false; };
       }
       // optionalAttrs e.gpu { "dri" = { hostPath = "/dev/dri"; mountPoint = "/dev/dri"; isReadOnly = false; }; }
       // mapAttrs' (sub: src: nameValuePair "bind-${sub}" {
@@ -195,7 +200,7 @@ in
         environment.systemPackages = e.packages ++ (with pkgs; [ ghostty xwayland-satellite git adwaita-icon-theme ]);
 
         systemd.user.extraConfig = ''
-          DefaultEnvironment="WAYLAND_DISPLAY=/run/host-wayland/wayland-0" "DISPLAY=:0" "XDG_SESSION_TYPE=wayland" "NIXOS_OZONE_WL=1" "GTK_THEME=Adwaita:dark"
+          DefaultEnvironment="WAYLAND_DISPLAY=/run/host-session/wayland-0" "DISPLAY=:0"${lib.optionalString e.audio " \"PULSE_SERVER=unix:/run/host-session/pulse\""} "XDG_SESSION_TYPE=wayland" "NIXOS_OZONE_WL=1" "GTK_THEME=Adwaita:dark"
         '';
         # This env's own Xwayland, so X11 apps can't see other envs' windows.
         systemd.user.services.xwayland-satellite = {
@@ -227,7 +232,18 @@ in
         Restart = "on-failure";
         RestartSec = 2;
       };
-    }) enabled;
+    }) enabled // {
+      # pipewire-pulse is socket-activated by the host's own socket; start it with the session
+      # so the env sockets exist before any env app wants sound.
+      pipewire-pulse.wantedBy = mkIf (filterAttrs (_: e: e.audio) enabled != { }) [ "graphical-session.target" ];
+    };
+
+    # One restricted PipeWire-Pulse socket per env that has audio, next to its Wayland socket.
+    services.pipewire.extraConfig.pipewire-pulse."60-envs" = {
+      "pulse.properties"."server.address" = [ "unix:native" ]
+        ++ mapAttrsToList (name: _: { address = "unix:${runDir name}/pulse"; "client.access" = "restricted"; })
+          (filterAttrs (_: e: e.audio) enabled);
+    };
 
     # Internet for every env; the LAN, other envs and the host only where allowed.
     networking.nftables.enable = true;

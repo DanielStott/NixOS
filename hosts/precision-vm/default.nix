@@ -29,7 +29,7 @@
     id = 9;
     label = "Demo";
     color = "rgb(a6e3a1)";
-    packages = with pkgs; [ mesa-demos xeyes wayland-utils curl ];
+    packages = with pkgs; [ mesa-demos xeyes wayland-utils curl pulseaudio ];
   };
   # A second env, with LAN access, to test that envs can't reach each other.
   envs.demo2 = {
