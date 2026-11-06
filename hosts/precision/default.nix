@@ -7,6 +7,7 @@
     ../../modules/nixos/nvidia-off.nix # iGPU only; nvidia-prime.nix once a driver builds for the kernel
     ../../modules/nixos/snapshots.nix
     ../../modules/nixos/first-login.nix
+    ../../modules/nixos/envs.nix # envs themselves are defined in the private flake
   ];
 
   networking.hostName = "precision";

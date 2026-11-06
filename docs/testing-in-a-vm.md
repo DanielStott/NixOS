@@ -37,3 +37,24 @@ Inside the VM, the host is at 10.0.2.2; the host reaches the VM's SSH on 127.0.0
   under UEFI.
 - **QEMU's `screendump` can't capture a virgl display** ("no surface"); take screenshots
   inside the guest with `grim` over SSH instead.
+
+## Envs (2026-11-06)
+
+The VM defines two test envs, `demo` (internet only) and `demo2` (LAN on). The isolation
+checks (protocols, internet, LAN, host, other env, Nix daemon) pass; GPU rendering inside
+an env uses the VM's virgl GPU through dmabuf.
+
+- **A tagging Wayland proxy (wayland-proxy-virtwl) forces software rendering**: it doesn't
+  pass GPU buffers through, so Mesa inside the env falls back to llvmpipe. Envs now connect
+  to Hyprland directly through a `wp_security_context_v1` socket (`pkgs/env-wayland-socket`),
+  which keeps dmabuf while Hyprland withholds its privileged protocols (its allow-list is in
+  `src/managers/ProtocolManager.cpp`). Windows are tagged by the client's cgroup instead of a
+  title prefix.
+- **A fixed `privateUsers` UID base needs `--private-users-ownership=auto`**; only `pick` gets
+  it by default. Without it the env's root can't write its own `/etc` and boot fails.
+- **Bind mounts use `:idmap`** (appended to the mount point), so host-owned folders appear as
+  the env user's own; no chown of shared data.
+- **`systemd-run --user` in a container doesn't search PATH for bare names**, so `env-launch`
+  runs commands through the env's `bash -l`.
+- **nftables needs `ve-*`**: `networking.nat.internalInterfaces = [ "ve-+" ]` (iptables syntax)
+  is written literally and matches nothing, so envs had no internet.

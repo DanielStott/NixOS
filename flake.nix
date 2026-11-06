@@ -51,6 +51,7 @@
         nvidia-off = ./modules/nixos/nvidia-off.nix;
         snapshots = ./modules/nixos/snapshots.nix;
         first-login = ./modules/nixos/first-login.nix;
+        envs = ./modules/nixos/envs.nix;
       };
       homeModules.default = ./modules/home;
 
