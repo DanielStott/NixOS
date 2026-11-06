@@ -58,3 +58,25 @@ an env uses the VM's virgl GPU through dmabuf.
   runs commands through the env's `bash -l`.
 - **nftables needs `ve-*`**: `networking.nat.internalInterfaces = [ "ve-+" ]` (iptables syntax)
   is written literally and matches nothing, so envs had no internet.
+
+## Apps in an env (2026-11-06)
+
+`precision-vm-apps` adds an `apps` env with the heavy desktop apps. Run it headless on the
+host GPU with `VM_DISPLAY=egl-headless VM_MEM=12G`. The session starts locked: type the test
+password through the QEMU monitor socket (`sendkey n`, `sendkey i`, ... `sendkey ret`).
+
+- **Every app opens a tagged, bordered window and draws:** Chrome, Vivaldi, Discord,
+  Obsidian, Godot 4.6 mono (project manager), Blender 5.1 and Rider (user agreement).
+  Chrome's and Electron's own sandboxes work inside the env (user namespaces nest).
+- **Mesa logs `vdrm_device_connect failed` and `radv/amdgpu: failed to initialize device`**:
+  it is probing Vulkan drivers this VM doesn't have. Harmless; the laptop uses Intel's.
+- **Claude Code runs, but its optional bubblewrap sandbox can't mount a fresh `/proc`**
+  ("Can't mount proc on /proc: Operation not permitted"). nspawn hides files such as
+  `/proc/kcore` and `/proc/sysrq-trigger` behind tmpfs mounts, and the kernel refuses a new
+  procfs where one is partly hidden. With `"sandbox": { "enableWeakerNestedSandbox": true }`
+  in Claude Code's settings it reuses the env's `/proc`; bubblewrap then still gives a
+  read-only system and blocks the network. The cost: sandboxed commands can read the env's
+  process list and the environment of the env user's processes. Without the sandbox turned
+  on (the default), nothing changes.
+- **Rootless Podman inside an env will likely hit the same `/proc` rule** (untested). The
+  plan is Podman beside each env rather than inside it.
