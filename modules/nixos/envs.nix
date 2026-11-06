@@ -94,7 +94,7 @@ let
       Type=Application
       Name=Terminal · ${e.label}
       Exec=env-run ${name}
-      Icon=utilities-terminal
+      Icon=com.mitchellh.ghostty
       Categories=System;TerminalEmulator;
       EOF
       for p in ${concatStringsSep " " e.packages}; do
@@ -113,23 +113,28 @@ let
 
   envWaylandSocket = pkgs.callPackage ../../pkgs/env-wayland-socket { };
 
-  # Tag each new window with its env (from the client's cgroup: container@<env>.service),
-  # before window rules run; then colour the border by tag.
+  # Tag each new window with its env (from the client's cgroup: container@<env>.service) and
+  # give it the env's border colour, focused or not. Set per window once rules have run.
   envHyprland = ''
-    hl.on("window.open_early", function(w)
+    local env_colors = { ${concatStringsSep ", " (mapAttrsToList (name: e: ''["${name}"] = "${e.color}"'') enabled)} }
+    hl.on("window.open", function(w)
       if not w.pid or w.pid <= 0 then return end
       local f = io.open("/proc/" .. w.pid .. "/cgroup", "r")
       if not f then return end
       local cgroup = f:read("*a")
       f:close()
       local env = cgroup:match("container@([%w_-]+)%.service")
-      if env then
-        hl.dispatch(hl.dsp.window.tag({ tag = "+env-" .. env, window = "address:" .. w.address }))
+      if not env then return end
+      local sel = "address:" .. w.address
+      hl.dispatch(hl.dsp.window.tag({ tag = "+env-" .. env, window = sel }))
+      local color = env_colors[env]
+      if color then
+        hl.dispatch(hl.dsp.window.set_prop({ prop = "active_border_color", value = color, window = sel }))
+        hl.dispatch(hl.dsp.window.set_prop({ prop = "inactive_border_color", value = color, window = sel }))
+        hl.dispatch(hl.dsp.window.set_prop({ prop = "border_size", value = "3", window = sel }))
       end
     end)
-  '' + concatStringsSep "" (mapAttrsToList (name: e: ''
-    hl.window_rule({ name = "env-${name}", match = { tag = "env-${name}" }, border_color = "${e.color}" })
-  '') enabled);
+  '';
 in
 {
   options = {
