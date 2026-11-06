@@ -21,6 +21,7 @@ let
   cfg = config.envs;
   enabled = filterAttrs (_: e: e.enable) cfg;
   user = config.envHostUser;
+  hostGraphicsExtras = config.hardware.graphics.extraPackages; # e.g. the iGPU's video decode driver
   uidBase = e: 268435456 + e.id * 65536; # 0x10000000 + id * 0x10000: each env's own range
   runDir = name: "/run/envs/${name}";
   stateDir = name: "/var/lib/envs/${name}";
@@ -200,7 +201,7 @@ in
         };
         programs.zsh.enable = true;
         programs.nix-ld.enable = true;
-        hardware.graphics.enable = e.gpu;
+        hardware.graphics = { enable = e.gpu; extraPackages = hostGraphicsExtras; };
         fonts.packages = with pkgs; [ noto-fonts noto-fonts-color-emoji nerd-fonts.jetbrains-mono ];
         environment.systemPackages = e.packages ++ (with pkgs; [ ghostty xwayland-satellite git adwaita-icon-theme ]);
 

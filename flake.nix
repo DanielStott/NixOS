@@ -60,5 +60,6 @@
 
       # The same desktop in a VM, for trying changes before installing them.
       nixosConfigurations.precision-vm = mkHost ./hosts/precision-vm;
+      nixosConfigurations.precision-vm-apps = mkHost ./hosts/precision-vm-apps;
     };
 }
