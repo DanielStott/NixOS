@@ -47,6 +47,10 @@ say "Formatting the boot partition"
 mkfs.vfat -F 32 -n NIXOS-ESP "$esp_dev"
 
 say "Encrypting NIXOS-CRYPT (choose the passphrase you'll type at every boot)"
+# The installer's console is US layout, but the installed system unlocks with a UK
+# layout; switch now so a passphrase with @ " # £ \ is typed the same both times.
+loadkeys uk 2>/dev/null && echo "Keyboard set to UK for the passphrase." \
+  || echo "Note: couldn't switch the keyboard to UK here; use letters, digits and spaces only."
 cryptsetup luksFormat --type luks2 "$crypt_dev"
 cryptsetup open "$crypt_dev" "$MAPPER"
 
