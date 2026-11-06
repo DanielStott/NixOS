@@ -20,6 +20,40 @@ top of it.
   fast-moving tools, zram swap, hourly snapper snapshots of `/home`, PipeWire,
   NetworkManager, UK keyboard and en_GB locale, zsh with oh-my-zsh, Ghostty.
 
+## Envs
+
+`modules/nixos/envs.nix` turns each `envs.<name>` into an isolated environment for one area
+of life (work, personal, a side project), Qubes-style but with containers instead of VMs:
+
+```nix
+envs.work = {
+  id = 1;                       # picks the env's UID range and its 10.231.1.0/24 link
+  label = "Work";
+  color = "rgb(89b4fa)";        # border colour of its windows
+  packages = [ pkgs.google-chrome pkgs.jetbrains.rider ];
+  lan = false;                  # internet only (default); true allows the home LAN
+  binds.Code = "/mnt/data/Code/Work";   # host folder -> ~/Code inside the env
+  # gpu = true; audio = true; nixDaemon = false;   (defaults)
+};
+```
+
+Each env is a systemd-nspawn container with its own UID range (its user maps to a high,
+unused UID on the host), an empty root at every start and a persistent home under
+`/var/lib/envs/<name>/home`. What it can reach:
+
+- **Windows:** straight to Hyprland with full GPU (dmabuf), through a socket made with
+  `wp_security_context_v1` (`pkgs/env-wayland-socket`). Hyprland gives such clients only its
+  ordinary protocols: no screen capture, clipboard managers, virtual keyboards or window
+  management. Each window is tagged with its env from the kernel's cgroup of the app
+  (unforgeable) and gets the env's border colour. X11 apps run on the env's own Xwayland.
+- **Sound:** its own PipeWire-Pulse socket with restricted access (play and record, can't
+  control other apps' streams).
+- **Network:** the internet; the LAN only with `lan = true`; never other envs or services on
+  the host. The host's Nix daemon is hidden unless `nixDaemon = true`.
+
+Start apps with `env-run <env> [command]` (a terminal if no command) or from the launcher,
+which lists each app once per env as "App · Label".
+
 ## Keys
 
 | Keys | Does |
