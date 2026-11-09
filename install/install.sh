@@ -65,9 +65,19 @@ read -r -p $'\nType "install" to continue: ' answer
 say "Formatting the boot partition"
 mkfs.vfat -F 32 -n NIXOS-ESP "$esp_dev"
 
-say "Encrypting NIXOS-CRYPT (choose the passphrase you'll type at every start)"
-cryptsetup luksFormat --type luks2 "$crypt_dev"
-cryptsetup open "$crypt_dev" "$MAPPER"
+say "Encrypting NIXOS-CRYPT"
+echo "Choose the passphrase you'll type at every start (it isn't shown as you type)."
+while :; do
+  read -rs -p "Passphrase: " pass; echo
+  read -rs -p "Again: " again; echo
+  [ -n "$pass" ] && [ "$pass" = "$again" ] && break
+  echo "They didn't match, or it was empty. Try again."
+done
+unset again
+# The typed passphrase, without a newline, is what the boot prompt will compare.
+printf '%s' "$pass" | cryptsetup luksFormat -q --type luks2 --key-file=- "$crypt_dev"
+printf '%s' "$pass" | cryptsetup open --key-file=- "$crypt_dev" "$MAPPER"
+unset pass
 
 say "Creating Btrfs subvolumes"
 mkfs.btrfs -f -L nixos "/dev/mapper/$MAPPER"

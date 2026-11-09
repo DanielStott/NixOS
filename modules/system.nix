@@ -55,6 +55,8 @@ in
   };
 
   environment.systemPackages = with pkgs; [ git curl ];
+  # No sudo lecture in the middle of the first-login steps.
+  security.sudo.extraConfig = "Defaults lecture = never";
 
   # The NixOS release this machine was first installed with; keep it in your private flake.
   system.stateVersion = "26.05";
